@@ -1,0 +1,85 @@
+# Importing necessary libraries
+import numpy as np
+import tensorflow as tf
+from tensorflow.keras.layers import Input, Conv2D, Flatten, Dense, Conv2DTranspose, Lambda, Reshape
+from tensorflow.keras.models import Model
+from tensorflow.keras.callbacks import EarlyStopping
+
+# Setting up constants and parameters
+INPUT_DIM = (64, 64, 3)
+CONV_PARAMS = [
+    {'filters': 32, 'kernel_size': 4, 'strides': 2, 'activation': 'relu'},
+    {'filters': 64, 'kernel_size': 4, 'strides': 2, 'activation': 'relu'},
+    {'filters': 64, 'kernel_size': 4, 'strides': 2, 'activation': 'relu'},
+    {'filters': 128, 'kernel_size': 4, 'strides': 2, 'activation': 'relu'}
+]
+DENSE_SIZE = 1024
+Z_DIM = 32
+EPOCHS = 10
+BATCH_SIZE = 32
+
+# Sampling function for VAE
+def sampling(args):
+    z_mean, z_log_var = args
+    batch = tf.shape(z_mean)[0]
+    epsilon = tf.random.normal(shape=(batch, Z_DIM))
+    return z_mean + tf.exp(0.5 * z_log_var) * epsilon
+
+# Building the CNN-VAE Model
+class ConvVAE:
+    def __init__(self):
+        self.input_dim = INPUT_DIM
+        self.z_dim = Z_DIM
+        self.encoder, self.decoder, self.vae = self._build()
+
+    def _build(self):
+        # Encoder
+        vae_x = Input(shape=INPUT_DIM)
+        x = vae_x
+        for layer_params in CONV_PARAMS:
+            x = Conv2D(**layer_params)(x)
+        x = Flatten()(x)
+        z_mean = Dense(Z_DIM)(x)
+        z_log_var = Dense(Z_DIM)(x)
+        z = Lambda(sampling)([z_mean, z_log_var])
+        encoder = Model(vae_x, [z_mean, z_log_var, z], name='encoder')
+
+        # Decoder
+        latent_inputs = Input(shape=(Z_DIM,))
+        x = Dense(DENSE_SIZE)(latent_inputs)
+        x = Reshape((1, 1, DENSE_SIZE))(x)
+        for layer_params in reversed(CONV_PARAMS):
+            x = Conv2DTranspose(filters=layer_params['filters'], kernel_size=layer_params['kernel_size'], 
+                                strides=layer_params['strides'], activation=layer_params['activation'])(x)
+        decoder = Model(latent_inputs, x, name='decoder')
+
+        # VAE Model
+        vae_outputs = decoder(encoder(vae_x)[2])
+        vae = Model(vae_x, vae_outputs, name='vae')
+
+        # Loss functions and compilation
+        reconstruction_loss = tf.reduce_mean(tf.reduce_sum(tf.keras.losses.mean_squared_error(vae_x, vae_outputs), axis=[1, 2, 3]))
+        kl_loss = -0.5 * tf.reduce_mean(z_log_var - tf.square(z_mean) - tf.exp(z_log_var) + 1)
+        vae_loss = reconstruction_loss + kl_loss
+        vae.add_loss(vae_loss)
+        vae.compile(optimizer='adam')
+
+        return encoder, decoder, vae
+
+    def train(self, data):
+        early_stop = EarlyStopping(monitor='val_loss', patience=5)
+        self.vae.fit(data, epochs=EPOCHS, batch_size=BATCH_SIZE, validation_split=0.2, callbacks=[early_stop])
+
+    def save_weights(self, filepath):
+        self.vae.save_weights(filepath)
+
+    def load_weights(self, filepath):
+        self.vae.load_weights(filepath)
+
+# Example usage
+if __name__ == "__main__":
+    vae = ConvVAE()
+    # Load your data here
+    # data = ...
+    # vae.train(data)
+    # vae.save_weights('path_to_save_weights')
