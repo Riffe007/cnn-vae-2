@@ -1,0 +1,4 @@
+tensorflow==2.x  # Replace with your specific version
+keras==2.x  # Replace with your specific version
+numpy
+matplotlib
