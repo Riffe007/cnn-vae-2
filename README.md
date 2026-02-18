@@ -1,79 +1,83 @@
 # cnn-vae-2
-# Convolutional Variational Autoencoder (CNN-VAE)
 
-Welcome to the GitHub repository for our CNN-VAE model. This repository contains the implementation of a Convolutional Variational Autoencoder, a generative deep learning model used for learning latent representations, particularly effective in image data processing.
+Prompt-to-image app powered by your trained ConvVAE model.
 
-## Description
+Architecture:
+- Python training/eval pipeline builds model weights and a prompt bank.
+- Python FastAPI service loads those artifacts and returns generated images from prompt text.
+- Next.js chat UI calls the FastAPI service and displays generated results.
 
-A Convolutional Variational Autoencoder (CNN-VAE) is a type of generative model that leverages convolutional neural networks (CNNs) within the VAE architecture. This implementation focuses on efficiently handling image data, allowing for effective learning of latent representations in an unsupervised manner.
+## 1) Train model + prompt bank
 
-## Features
-
-- Convolutional Neural Network for image data encoding and decoding.
-- Variational inference techniques for latent space generation.
-- Implementation using TensorFlow and Keras for ease of use and flexibility.
-- Customizable architecture to fit various types of image data.
-
-## Prerequisites
-
-Ensure you have the following prerequisites installed:
-- Python 3.7 or later
-- TensorFlow 2.0 or later
-- NumPy
-
-Install the required packages using pip:
+### Install
 ```bash
-pip install tensorflow numpy
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -U pip
+pip install -r requirements.txt
+```
 
-## Getting Started
-Clone the Repository
+### Train/eval and build prompt bank (CIFAR-10)
+```bash
+python3 train_eval.py \
+  --dataset cifar10 \
+  --train-split train \
+  --eval-split test \
+  --image-column img \
+  --label-column label \
+  --build-prompt-bank \
+  --train-samples 5000 \
+  --eval-samples 1000 \
+  --epochs 5 \
+  --batch-size 32 \
+  --size 64 \
+  --z-dim 32 \
+  --beta 1.0
+```
 
-bash
-Copy code
-git clone https://github.com/Riffe007/cnn-vae-2.git
-cd cnn-vae-2
+Artifacts in `artifacts/`:
+- `vae.weights.h5`
+- `prompt_bank.npz`
+- `metrics.json`
+- `generated_grid.png`
+- `reconstruction_grid.png`
 
-Initialize and Train the Model
+## 2) Run model API
+```bash
+source .venv/bin/activate
+uvicorn api_service:app --host 0.0.0.0 --port 8000
+```
 
-Import the ConvVAE class from the script.
-Instantiate and train the model with your data.
-python
-Copy code
-from conv_vae import ConvVAE
+API endpoints:
+- `GET /health`
+- `POST /generate` with JSON: `{ "prompt": "a frog", "num_images": 1, "seed": 42 }`
 
-vae = ConvVAE()
-# Assume 'data' is your dataset
-vae.train(data)
+## 3) Run chat UI
+```bash
+cd web
+npm install
+cp .env.example .env.local
+# MODEL_API_URL=http://localhost:8000
+npm run dev
+```
 
+## Deploy plan
+- Frontend (`web/`) -> Vercel
+- Python model API (`api_service.py`) -> separate host (Render/Fly/Railway/VM)
 
-Model Interaction
+## Dataset guidance
+For this class-conditioned prompt flow, use labeled datasets:
+- `cifar10`
+- `fashion_mnist`
+- `beans`
 
-Save and load model weights for reusability.
-python
-Copy code
-vae.save_weights('path_to_save_weights')
-vae.load_weights('path_to_load_weights')
-
-## Customizing the Model
-Modify the parameters within the ConvVAE class to fit the specific requirements of your image dataset, such as adjusting the number of convolutional filters or kernel sizes.
-
-## Contributions
-Your contributions are welcome! Please feel free to submit pull requests or open issues to discuss potential changes or improvements.
+## Project files
+- `conv_vae.py`: VAE model
+- `data_hf.py`: dataset loading (images + labels)
+- `train_eval.py`: training/eval + prompt bank generation
+- `prompt_bank.py`: prompt-to-class latent sampling logic
+- `api_service.py`: FastAPI inference service
+- `web/`: Next.js chat frontend
 
 ## License
-This project is released under the MIT License.
-
-vbnet
-Copy code
-
-### Additional Notes:
-
-- The code blocks are formatted with triple backticks (```) for markdown syntax.
-- The README assumes a general structure for your repository. Adjust as needed based on the actual contents and structure of your code.
-- The link to the MIT License is a placeholder. Please replace it with the actual link to your license file if it's different. 
-
-
-
-
-
-
+MIT (see `LICENSE`).

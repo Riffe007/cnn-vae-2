@@ -1,20 +1,14 @@
+"""Central project configuration values."""
+
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
 class Config:
-    # CNN-VAE Model Parameters
-    input_dim = (64, 64, 3)
-    conv_filters = [32, 64, 64, 128]
-    conv_kernel_sizes = [4, 4, 4, 4]
-    conv_strides = [2, 2, 2, 2]
-    dense_size = 1024
-    z_dim = 32
-    epochs = 1
-    batch_size = 32
-
-    # Database Configuration (if applicable)
-    db_uri = "your_database_uri"
-
-    # Any other configurations
-    # ...
-
-# Usage:
-# from config.config import Config
-# Then, access Config.input_dim, Config.conv_filters, etc.
+    input_dim: tuple[int, int, int] = (64, 64, 3)
+    conv_filters: tuple[int, ...] = (32, 64, 64, 128)
+    conv_kernel_sizes: tuple[int, ...] = (4, 4, 4, 4)
+    conv_strides: tuple[int, ...] = (2, 2, 2, 2)
+    z_dim: int = 32
+    epochs: int = 10
+    batch_size: int = 32
