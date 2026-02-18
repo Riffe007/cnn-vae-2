@@ -60,9 +60,19 @@ cp .env.example .env.local
 npm run dev
 ```
 
+## Convenience commands
+```bash
+make backend-install
+make backend-train
+make backend-api
+make web-install
+make web-dev
+```
+
 ## Deploy plan
 - Frontend (`web/`) -> Vercel
 - Python model API (`backend/api_service.py`) -> separate host (Render/Fly/Railway/VM)
+- Optional containerization for backend via `backend/Dockerfile`
 
 ## Project files
 - `backend/conv_vae.py`: VAE model
@@ -70,6 +80,8 @@ npm run dev
 - `backend/train_eval.py`: training/eval + prompt bank generation
 - `backend/prompt_bank.py`: prompt-to-class latent sampling
 - `backend/api_service.py`: FastAPI inference service
+- `backend/.env.example`: backend artifact/env config
+- `backend/Dockerfile`: backend container image
 - `web/`: Next.js chat frontend
 
 ## License

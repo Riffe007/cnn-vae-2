@@ -19,4 +19,4 @@ npm run dev
 4. Deploy.
 
 ## Important
-Vercel hosts this frontend, but the Python/TensorFlow model API should run on a separate service (GPU/CPU host) and be referenced via `MODEL_API_URL`.
+Vercel hosts this frontend, but the Python/TensorFlow model API should run on a separate service and be referenced via `MODEL_API_URL`.
