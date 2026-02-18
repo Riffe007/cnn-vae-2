@@ -17,5 +17,5 @@ dependencies = [
   "pillow>=10.4,<12.0",
 ]
 
-[tool.setuptools]
-py-modules = ["conv_vae", "config", "data_hf", "train_eval", "prompt_bank", "api_service"]
+[tool.setuptools.packages.find]
+include = ["backend", "backend.*"]

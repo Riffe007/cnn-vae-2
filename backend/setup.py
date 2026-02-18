@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import find_packages, setup
 
 setup(
     name="cnn-vae-project",
@@ -6,7 +6,7 @@ setup(
     description="Convolutional Variational Autoencoder built with TensorFlow/Keras",
     author="Riffe007",
     url="https://github.com/Riffe007/cnn-vae-2",
-    py_modules=["conv_vae", "config", "data_hf", "train_eval", "prompt_bank", "api_service"],
+    packages=find_packages(include=["backend", "backend.*"]),
     install_requires=[
         "tensorflow>=2.15,<3.0",
         "numpy>=1.24,<3.0",

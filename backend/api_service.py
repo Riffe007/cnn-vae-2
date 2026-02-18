@@ -12,8 +12,8 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from PIL import Image
 
-from conv_vae import ConvVAE
-from prompt_bank import load_prompt_bank, sample_latents_for_prompt
+from backend.conv_vae import ConvVAE
+from backend.prompt_bank import load_prompt_bank, sample_latents_for_prompt
 
 
 class GenerateRequest(BaseModel):

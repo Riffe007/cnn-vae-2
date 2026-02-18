@@ -9,9 +9,9 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-from conv_vae import ConvVAE
-from data_hf import load_hf_images, load_hf_images_and_labels
-from prompt_bank import build_prompt_bank, save_prompt_bank
+from backend.conv_vae import ConvVAE
+from backend.data_hf import load_hf_images, load_hf_images_and_labels
+from backend.prompt_bank import build_prompt_bank, save_prompt_bank
 
 
 def parse_int_list(value: str) -> tuple[int, ...]:
