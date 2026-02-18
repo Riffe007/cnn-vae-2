@@ -14,7 +14,7 @@ setup(
         "datasets>=2.18,<4.0",
         "fastapi>=0.115,<1.0",
         "uvicorn>=0.30,<1.0",
-        "pillow>=10.4,<12.0",
+        "pillow>=10.4,<13.0",
     ],
     python_requires=">=3.10",
 )
